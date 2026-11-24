@@ -35,6 +35,18 @@ jobs:
         with:
           workspaces: src-tauri
       - run: npm ci
+      - name: Release notes from CHANGELOG.md
+        id: notes
+        shell: bash
+        run: |
+          # Section between "## <tag>" and the next "## " heading.
+          notes=$(awk -v tag="## ${GITHUB_REF_NAME}" '$0==tag{f=1;next} /^## /{f=0} f' CHANGELOG.md)
+          [ -z "$notes" ] && notes="See CHANGELOG.md"
+          {
+            echo 'body<<NOTES_EOF'
+            echo "$notes"
+            echo 'NOTES_EOF'
+          } >> "$GITHUB_OUTPUT"
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -43,7 +55,7 @@ jobs:
         with:
           tagName: ${{ github.ref_name }}
           releaseName: MeowViewer ${{ github.ref_name }}
-          releaseBody: See the changelog for what's new.
+          releaseBody: ${{ steps.notes.outputs.body }}
           releaseDraft: false
           prerelease: false
           includeUpdaterJson: true

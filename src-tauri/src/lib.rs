@@ -1376,6 +1376,18 @@ pub fn run() {
             app.manage(state);
             purge_old_trash(&handle.state::<AppState>());
 
+            // Failsafe: the window starts hidden (no white flash) and the UI shows it when ready.
+            // If the UI ever fails to load, show it anyway so the app never looks like it didn't start.
+            let h2 = handle.clone();
+            std::thread::spawn(move || {
+                std::thread::sleep(std::time::Duration::from_secs(4));
+                if let Some(w) = h2.get_webview_window("main") {
+                    if !w.is_visible().unwrap_or(true) {
+                        let _ = w.show();
+                    }
+                }
+            });
+
             // Opening a single file should be instant: index the library a little later.
             let delay = if startup.file.is_some() { 2500 } else { 300 };
             std::thread::spawn(move || {

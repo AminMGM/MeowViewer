@@ -291,7 +291,7 @@ export function Viewer() {
       {bg === 'ambient' && (
         <div
           className="ambient"
-          key={path}
+          key={`ambient:${path}`}
           style={{ backgroundImage: `url("${isVault ? vaultThumbUrl(path) : thumbUrl(path, 320)}")` }}
         />
       )}
