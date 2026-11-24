@@ -28,3 +28,34 @@ src-tauri/target
 src-tauri/gen/schemas
 graphify-out
 *.key
+
+# Private planning notes
+PLAN.md
+NOTES.md
+TODO.md
+*.private.*
+
+# AI assistant / agent files
+CLAUDE.md
+CLAUDE.local.md
+.claude/
+AGENTS.md
+.cursor/
+.cursorrules
+.windsurfrules
+.aider*
+.github/copilot-instructions.md
+.continue/
+.codex/
+graphify-out/
+
+# Secrets & local config
+*.key
+*.pem
+.env
+.env.*
+!.env.example
+
+# Scratch
+scratch/
+tmp/
