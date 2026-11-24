@@ -1,0 +1,197 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "MeowViewer",
+  "version": "0.2.0",
+  "identifier": "com.aminmgm.meowviewer",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "npm run vite",
+    "beforeBuildCommand": "npm run build"
+  },
+  "app": {
+    "withGlobalTauri": false,
+    "windows": [
+      {
+        "label": "main",
+        "title": "MeowViewer",
+        "width": 1280,
+        "height": 820,
+        "minWidth": 520,
+        "minHeight": 380,
+        "center": true,
+        "visible": false,
+        "decorations": false,
+        "transparent": true,
+        "shadow": true,
+        "theme": "Dark",
+        "windowEffects": {
+          "effects": [
+            "mica"
+          ]
+        },
+        "dragDropEnabled": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": [
+      "nsis"
+    ],
+    "createUpdaterArtifacts": true,
+    "publisher": "AminMGM",
+    "homepage": "https://github.com/AminMGM/MeowViewer",
+    "shortDescription": "Fast, light photo & video viewer",
+    "longDescription": "A fast, light, frosted-glass photo & video viewer and gallery for Windows.",
+    "category": "Photography",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper"
+      },
+      "nsis": {
+        "installMode": "currentUser",
+        "displayLanguageSelector": false,
+        "installerIcon": "icons/icon.ico",
+        "sidebarImage": "installer/sidebar.bmp",
+        "headerImage": "installer/header.bmp"
+      }
+    },
+    "fileAssociations": [
+      {
+        "ext": [
+          "jpg",
+          "jpeg",
+          "jfif",
+          "jpe"
+        ],
+        "name": "JPEG image",
+        "description": "JPEG image",
+        "role": "Viewer",
+        "mimeType": "image/jpeg"
+      },
+      {
+        "ext": [
+          "png",
+          "apng"
+        ],
+        "name": "PNG image",
+        "description": "PNG image",
+        "role": "Viewer",
+        "mimeType": "image/png"
+      },
+      {
+        "ext": [
+          "gif"
+        ],
+        "name": "GIF image",
+        "description": "GIF image",
+        "role": "Viewer",
+        "mimeType": "image/gif"
+      },
+      {
+        "ext": [
+          "webp"
+        ],
+        "name": "WebP image",
+        "description": "WebP image",
+        "role": "Viewer",
+        "mimeType": "image/webp"
+      },
+      {
+        "ext": [
+          "avif"
+        ],
+        "name": "AVIF image",
+        "description": "AVIF image",
+        "role": "Viewer",
+        "mimeType": "image/avif"
+      },
+      {
+        "ext": [
+          "heic",
+          "heif",
+          "hif"
+        ],
+        "name": "HEIC image",
+        "description": "HEIC image",
+        "role": "Viewer",
+        "mimeType": "image/heic"
+      },
+      {
+        "ext": [
+          "bmp",
+          "dib",
+          "ico",
+          "tif",
+          "tiff",
+          "jxl",
+          "jxr",
+          "wdp",
+          "dds",
+          "tga",
+          "svg"
+        ],
+        "name": "Image",
+        "description": "Image",
+        "role": "Viewer"
+      },
+      {
+        "ext": [
+          "cr2",
+          "cr3",
+          "nef",
+          "arw",
+          "dng",
+          "raf",
+          "orf",
+          "rw2",
+          "pef",
+          "srw"
+        ],
+        "name": "RAW photo",
+        "description": "RAW photo",
+        "role": "Viewer"
+      },
+      {
+        "ext": [
+          "mp4",
+          "m4v",
+          "mov",
+          "mkv",
+          "webm",
+          "avi",
+          "wmv",
+          "3gp",
+          "mts",
+          "m2ts"
+        ],
+        "name": "Video",
+        "description": "Video",
+        "role": "Viewer"
+      }
+    ],
+    "copyright": "Made with ♥ by AminMGM — github.com/AminMGM"
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDFDQTc0NjEwMzNEODRDRkEKUldUNlROZ3pFRWFuSERrUUVkQTkvamNUSk1hQUQwN2poYXAwYVNCd2NGYWpnTUtFcjhISk8vUDkK",
+      "endpoints": [
+        "https://github.com/AminMGM/MeowViewer/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  }
+}
