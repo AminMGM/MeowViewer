@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.1.0
+
+**New**
+- Subtitles inside MKV / WebM files (SRT, ASS, WebVTT) are read directly — no codec pack needed — and load
+  automatically; right-to-left subtitles (Farsi, Arabic, Hebrew) display correctly
+- Installs to Program Files by default
+- Your app icon everywhere: title bar, setup, taskbar, Start menu, desktop and installer
+
+**Fixed**
+- Installing or updating while MeowViewer is open failed with "Error opening file for writing" — the installer
+  now closes the app first and refreshes Windows' icon cache
+
 ## v1.0.0
 
 The first stable release.

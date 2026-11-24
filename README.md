@@ -17,6 +17,8 @@ Opens a photo instantly like the macOS viewer. Browses your whole library like a
 
 </div>
 
+<img src="docs/screenshots/gallery-dark.jpg" alt="MeowViewer gallery in dark mode" width="100%" />
+
 ---
 
 ## Why MeowViewer
@@ -31,10 +33,19 @@ Opens a photo instantly like the macOS viewer. Browses your whole library like a
 | 🔒 **Private album** | Encrypted with your PIN. Hidden from everything else. |
 | 🎨 **Looks good** | Frosted Windows 11 glass, light & dark, seven accent colours. |
 
+## Screenshots
+
+| | |
+|---|---|
+| <img src="docs/screenshots/viewer.jpg" alt="Viewer with ambient background and filmstrip" /> | <img src="docs/screenshots/editor.jpg" alt="GPU photo editor with live histogram" /> |
+| **Viewer** — ambient background, filmstrip, auto-hiding controls | **Editor** — GPU adjustments, looks, markup, live histogram |
+| <img src="docs/screenshots/gallery-light.jpg" alt="Gallery in light mode" /> | <img src="docs/screenshots/gallery-dark.jpg" alt="Gallery in dark mode" /> |
+| **Light mode** — follows Windows, or pick it yourself | **Dark mode** — frosted Windows 11 glass |
+
 ## Install
 
 1. Download **`MeowViewer_x.y.z_x64-setup.exe`** from the [latest release](https://github.com/AminMGM/MeowViewer/releases/latest).
-2. Run it — no admin rights needed. A short setup asks for your theme, library folders and optional extras.
+2. Run it — it installs to *Program Files* (Windows asks for permission once). A short setup asks for your theme, library folders and optional extras.
 3. Optional: *Settings → Default app* to open your photos and videos with MeowViewer.
 
 Updates install themselves from this repository (signed releases).
@@ -60,7 +71,7 @@ Updates install themselves from this repository (signed releases).
 
 - Glass controls, a seek bar that previews frames on hover, speed 0.25–3×, A-B loop, frame stepping
 - Picks up where you left off; can play the next video automatically
-- **Subtitles**: matching `.srt` / `.vtt` / `.ass` files load automatically, or load any file; embedded subtitle tracks; size, colour, background, position and timing (G / H)
+- **Subtitles**: matching `.srt` / `.vtt` / `.ass` files and subtitles inside MKV files load automatically (no extra download), or load any file; right-to-left languages; size, colour, background, position and timing (G / H)
 - Audio track switching, volume boost to 200%, equaliser presets
 - Brightness, contrast, saturation, hue; aspect-ratio override; rotate; fill/fit
 - Save a frame as PNG, picture-in-picture, always on top, jump to time (Ctrl+G)

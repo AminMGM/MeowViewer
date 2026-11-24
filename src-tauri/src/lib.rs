@@ -5,6 +5,7 @@ mod editors;
 mod index;
 mod media;
 mod meta;
+mod mkv;
 mod ocr;
 mod share;
 mod shellprops;
@@ -1116,7 +1117,20 @@ async fn video_tracks(state: State<'_, AppState>, path: String) -> R<Vec<codecs:
     let data = state.paths.data.clone();
     tauri::async_runtime::spawn_blocking(move || {
         let mut t = codecs::sidecar_subs(&path);
-        t.extend(codecs::streams(&data, &path));
+        let ext = media::ext_of(&path);
+        let native = matches!(ext.as_str(), "mkv" | "webm" | "mka" | "mk3d");
+        if native {
+            // Text subtitles inside MKV/WebM: read natively, no codec pack needed.
+            for s in mkv::tracks(&path) {
+                let mut label = if s.name.is_empty() { s.language.clone() } else { format!("{} · {}", s.name, s.language) };
+                if s.forced {
+                    label.push_str(" (forced)");
+                }
+                t.push(codecs::Track { kind: "embedded".into(), src: format!("mkv:{}", s.number), label });
+            }
+        }
+        // FFmpeg adds audio tracks (and subtitles for other containers).
+        t.extend(codecs::streams(&data, &path).into_iter().filter(|x| !(native && x.kind == "embedded")));
         t
     })
     .await
@@ -1139,9 +1153,12 @@ fn read_subtitle(path: String) -> R<String> {
 }
 
 #[tauri::command]
-async fn extract_subtitle(state: State<'_, AppState>, path: String, index: u32) -> R<String> {
+async fn extract_subtitle(state: State<'_, AppState>, path: String, src: String) -> R<String> {
     let data = state.paths.data.clone();
-    tauri::async_runtime::spawn_blocking(move || codecs::extract_sub(&data, &path, index))
+    tauri::async_runtime::spawn_blocking(move || match src.strip_prefix("mkv:") {
+        Some(n) => mkv::extract(&path, n.parse().map_err(|_| "bad track".to_string())?),
+        None => codecs::extract_sub(&data, &path, src.parse().map_err(|_| "bad track".to_string())?),
+    })
         .await
         .map_err(|e| e.to_string())?
 }

@@ -169,7 +169,7 @@ export const VideoPlayer = forwardRef<VideoHandle, Props>(function VideoPlayer(
     api.videoTracks(path).then(async (tr) => {
       if (!live) return
       setTracks(tr)
-      const first = tr.find((x) => x.kind === 'file')
+      const first = tr.find((x) => x.kind === 'file') ?? tr.find((x) => x.kind === 'embedded' && x.src.startsWith('mkv:'))
       if (first) loadTrack(first, true)
     })
     return () => {
@@ -185,7 +185,7 @@ export const VideoPlayer = forwardRef<VideoHandle, Props>(function VideoPlayer(
       return
     }
     try {
-      const text = tr.kind === 'embedded' ? await api.extractSubtitle(path, +tr.src) : await api.readSubtitle(tr.src)
+      const text = tr.kind === 'embedded' ? await api.extractSubtitle(path, tr.src) : await api.readSubtitle(tr.src)
       const c = parseSubtitles(text)
       setCues(c)
       setSubLabel(tr.label)

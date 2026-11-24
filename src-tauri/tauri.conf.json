@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "MeowViewer",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "identifier": "com.aminmgm.meowviewer",
   "build": {
     "frontendDist": "../dist",
@@ -60,11 +60,12 @@
         "type": "downloadBootstrapper"
       },
       "nsis": {
-        "installMode": "currentUser",
+        "installMode": "perMachine",
         "displayLanguageSelector": false,
         "installerIcon": "icons/icon.ico",
         "sidebarImage": "installer/sidebar.bmp",
-        "headerImage": "installer/header.bmp"
+        "headerImage": "installer/header.bmp",
+        "installerHooks": "installer/hooks.nsh"
       }
     },
     "fileAssociations": [

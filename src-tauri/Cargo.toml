@@ -1,6 +1,6 @@
 [package]
 name = "meowviewer"
-version = "1.0.0"
+version = "1.1.0"
 description = "A fast, light photo & video viewer and gallery for Windows"
 authors = ["AminMGM"]
 license = "MIT"

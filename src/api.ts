@@ -279,7 +279,7 @@ export const api = {
     invoke<string>('save_edited', { path, data, mode, ext }),
   videoTracks: (path: string) => invoke<Track[]>('video_tracks', { path }),
   readSubtitle: (path: string) => invoke<string>('read_subtitle', { path }),
-  extractSubtitle: (path: string, index: number) => invoke<string>('extract_subtitle', { path, index }),
+  extractSubtitle: (path: string, src: string) => invoke<string>('extract_subtitle', { path, src }),
   videoWithAudio: (path: string, audio: number) => invoke<string>('video_with_audio', { path, audio }),
   codecsInstalled: () => invoke<boolean>('codecs_installed'),
   installCodecs: () => invoke<void>('install_codecs'),
