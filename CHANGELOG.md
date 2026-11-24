@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.2.1
+
+**New**
+- Compare: start from any photo (right-click → Compare with…), pick or swap the photos you want, add up to four,
+  and a new **Slider** mode with a draggable divider; zoom and pan stay in sync
+- Cancel any long job: library scan (×  in the title bar), duplicate scan, export, SD-card import, codec download,
+  video conversion; pause / resume text reading
+- Back button in albums, folders, tags and other drill-down views
+- MeowViewer appears in Windows Settings → Default apps (and in every "Open with" list)
+
+**Changed**
+- The app icon is now exactly the provided glyph, with no frame
+
+**Fixed**
+- Bluetooth: files are handed to the Bluetooth transfer window directly (like Explorer's Send to) instead of asking for a path
+
 ## v1.1.0
 
 **New**

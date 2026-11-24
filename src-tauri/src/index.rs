@@ -97,7 +97,12 @@ impl Indexer {
                 loop {
                     let roots = effective_roots(&roots);
                     me.restart_watcher(app.clone(), db.clone(), &roots, exclude.clone());
-                    me.scan(&app, &db, &roots, &exclude);
+                    let cancel = crate::cancel::token("scan");
+                    let finished = me.scan(&app, &db, &roots, &exclude, &cancel);
+                    if !finished {
+                        me.rescan_requested.store(false, Ordering::SeqCst);
+                        break;
+                    }
                     if !me.rescan_requested.swap(false, Ordering::SeqCst) {
                         break;
                     }
@@ -109,7 +114,8 @@ impl Indexer {
             .expect("spawn indexer");
     }
 
-    fn scan(&self, app: &AppHandle, db: &Db, roots: &[String], exclude: &PathBuf) {
+    /// Returns false when cancelled (nothing is removed from the library in that case).
+    fn scan(&self, app: &AppHandle, db: &Db, roots: &[String], exclude: &PathBuf, cancel: &std::sync::atomic::AtomicBool) -> bool {
         self.found.store(0, Ordering::Relaxed);
         self.indexed.store(0, Ordering::Relaxed);
         let known = db.known_files().unwrap_or_default();
@@ -122,6 +128,10 @@ impl Indexer {
                 !skip_dir(e) && !e.path().starts_with(exclude)
             });
             for entry in walker.filter_map(|e| e.ok()) {
+                if crate::cancel::is_cancelled(cancel) {
+                    let _ = db.upsert(&batch);
+                    return false;
+                }
                 if !entry.file_type().is_file() {
                     continue;
                 }
@@ -161,6 +171,7 @@ impl Indexer {
         let _ = db.upsert(&batch);
         let gone: Vec<String> = known.into_keys().filter(|p| !seen.contains(p)).collect();
         let _ = db.remove_paths(&gone);
+        true
     }
 
     fn restart_watcher(&self, app: AppHandle, db: Arc<Db>, roots: &[String], exclude: PathBuf) {

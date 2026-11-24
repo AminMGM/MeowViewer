@@ -47,9 +47,9 @@ interface Store {
   toasts: Toast[]
   ready: boolean
   editing: string | null
-  compare: string[] | null
+  compare: { paths: string[]; pool: Item[] | null } | null
   setEditing: (p: string | null) => void
-  setCompare: (p: string[] | null) => void
+  setCompare: (p: string[] | null, pool?: Item[] | null) => void
 
   loadSettings: () => Promise<void>
   patchSettings: (p: Partial<Settings>) => void
@@ -84,7 +84,7 @@ export const useStore = create<Store>((set, get) => ({
   editing: null,
   compare: null,
   setEditing: (p) => set({ editing: p }),
-  setCompare: (p) => set({ compare: p }),
+  setCompare: (p, pool) => set({ compare: p ? { paths: p, pool: pool ?? null } : null }),
 
   loadSettings: async () => set({ settings: await api.settings() }),
   patchSettings: (p) => {

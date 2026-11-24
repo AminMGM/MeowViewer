@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  ArrowDownWideNarrow, ArrowUpNarrowWide, BookmarkPlus, CalendarHeart, Check, ChevronRight, Columns2, Copy,
+  ArrowDownWideNarrow, ArrowLeft, ArrowUpNarrowWide, BookmarkPlus, CalendarHeart, Check, ChevronRight, Columns2, Copy,
   FileOutput, FolderOpen, Heart, ImageOff, Layers, Lock, Pencil, Play, Plus, Share2, Star, Tag, Trash2, X,
 } from 'lucide-react'
 import { api, errText, I, KIND, nameOf, SOURCE_LABEL, thumbUrl, type FolderNode, type Item, type Query, type SortKey } from '../api'
@@ -181,8 +181,8 @@ export function LibraryView() {
           <button className="icon-btn" title="Add tags" onClick={() => tagItems(selPaths)}>
             <Tag size={18} />
           </button>
-          {selPaths.length >= 2 && selPaths.length <= 4 && (
-            <button className="icon-btn" title="Compare side by side" onClick={() => useStore.getState().setCompare(selPaths)}>
+          {selPaths.length >= 1 && selPaths.length <= 4 && (
+            <button className="icon-btn" title="Compare" onClick={() => useStore.getState().setCompare(selPaths, items)}>
               <Columns2 size={18} />
             </button>
           )}
@@ -223,6 +223,19 @@ export function LibraryView() {
             </nav>
           )}
           <div className="title-row">
+            {['folder', 'album', 'source', 'tag', 'type', 'onthisday'].includes(view.kind) && (
+              <button
+                className="icon-btn back-btn"
+                title="Back (Alt+←)"
+                onClick={() => {
+                  const st = useStore.getState()
+                  if (st.history.length) st.back()
+                  else go({ kind: 'albums' })
+                }}
+              >
+                <ArrowLeft size={20} />
+              </button>
+            )}
             <h1>{search ? `Results for “${search}”` : titleOf(view)}</h1>
             <span className="count">{items ? items.length.toLocaleString() : ''}</span>
             <span className="spacer" />

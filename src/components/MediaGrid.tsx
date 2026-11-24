@@ -209,14 +209,18 @@ export function MediaGrid({ items, group, header, empty, onOpen, menuFor, thumbF
         if (menuFor) return openMenu(e, menuFor(it, i))
         const base = itemMenu(it, { open: () => open(i), slideshow: () => startSlideshow(items, i) })
         const sel = [...selection]
+        const photos = items.filter((x) => x[I.kind] !== KIND.video)
         const extra: MenuItem[] =
           sel.length >= 2 && sel.length <= 4
             ? [
-                { label: `Compare ${sel.length} selected`, icon: <Columns2 size={16} />, run: () => useStore.getState().setCompare(sel) },
+                { label: `Compare ${sel.length} selected`, icon: <Columns2 size={16} />, run: () => useStore.getState().setCompare(sel, photos) },
                 { separator: true },
               ]
-            : sel.length > 4
-              ? [{ label: 'Select 2–4 photos to compare', icon: <Columns2 size={16} />, disabled: true }, { separator: true }]
+            : it[I.kind] !== KIND.video
+              ? [
+                  { label: 'Compare with…', icon: <Columns2 size={16} />, run: () => useStore.getState().setCompare([it[I.path]], photos) },
+                  { separator: true },
+                ]
               : []
         openMenu(e, [...extra, ...base])
       },

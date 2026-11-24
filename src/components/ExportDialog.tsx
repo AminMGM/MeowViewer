@@ -77,6 +77,7 @@ export function ExportDialog() {
       })
     } catch (e) {
       setDone(null)
+      close()
       toast(errText(e))
     }
   }
@@ -154,8 +155,8 @@ export function ExportDialog() {
           </div>
         )}
         <div className="modal-actions">
-          <button className="btn" onClick={close} disabled={done != null}>
-            Cancel
+          <button className="btn" onClick={() => (done != null ? api.cancelTask('export') : close())}>
+            {done != null ? 'Stop export' : 'Cancel'}
           </button>
           <button className="btn primary" onClick={run} disabled={done != null}>
             {done != null ? `Exporting ${done}/${paths.length}…` : 'Export'}

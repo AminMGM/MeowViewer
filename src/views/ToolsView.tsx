@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { listen } from '@tauri-apps/api/event'
-import { Copy, HardDrive, Layers, MonitorSmartphone, Scan, Sparkles, Trash2, Video } from 'lucide-react'
-import { api, errText, fmtSize, I, KIND, nameOf, SOURCE_LABEL, thumbUrl, type DupGroup, type Item, type Stats } from '../api'
+import { Copy, HardDrive, Layers, MonitorSmartphone, Scan, Sparkles, Trash2, Video, X } from 'lucide-react'
+import { api, errText, isCancelled, fmtSize, I, KIND, nameOf, SOURCE_LABEL, thumbUrl, type DupGroup, type Item, type Stats } from '../api'
 import { toast, useStore } from '../store'
 import { moveToTrash } from '../actions'
 import { MediaGrid } from '../components/MediaGrid'
@@ -124,7 +124,14 @@ function Overview({ stats, drives, onTab }: { stats: Stats | null; drives: strin
                 ? `Found ${drives.join(', ')}. New photos are copied to Pictures\\Imports by date; already-imported files are skipped.`
                 : 'Insert a camera card or connect a phone in USB storage mode (a drive with a DCIM folder).'}
             </p>
-            {importing != null && <p className="set-desc">{importing} copied…</p>}
+            {importing != null && (
+              <p className="set-desc">
+                {importing} copied…{' '}
+                <button className="link-btn" onClick={() => api.cancelTask('import')}>
+                  Cancel
+                </button>
+              </p>
+            )}
           </div>
           {drives.map((d) => (
             <button
@@ -136,7 +143,7 @@ function Overview({ stats, drives, onTab }: { stats: Stats | null; drives: strin
                   const n = await api.importFrom(d + 'DCIM')
                   toast(n ? `${n} new items imported` : 'Nothing new to import')
                 } catch (e) {
-                  toast(errText(e))
+                  toast(isCancelled(e) ? errText(e) : errText(e))
                 }
                 setImporting(null)
               }}
@@ -167,7 +174,7 @@ function Duplicates() {
     try {
       setGroups(await api.duplicates(similar))
     } catch (e) {
-      toast(errText(e))
+      toast(isCancelled(e) ? 'Scan cancelled' : errText(e))
     }
     setRunning(false)
     setProgress(null)
@@ -190,9 +197,15 @@ function Duplicates() {
               <input type="checkbox" checked={similar} onChange={(e) => setSimilar(e.target.checked)} /> Include similar photos
             </label>
             <span className="spacer" />
-            <button className="btn primary" disabled={running} onClick={scan}>
-              <Sparkles size={15} /> {running ? 'Scanning…' : groups ? 'Scan again' : 'Scan library'}
-            </button>
+            {running ? (
+              <button className="btn danger" onClick={() => api.cancelTask('dups')}>
+                <X size={15} /> Cancel scan
+              </button>
+            ) : (
+              <button className="btn primary" onClick={scan}>
+                <Sparkles size={15} /> {groups ? 'Scan again' : 'Scan library'}
+              </button>
+            )}
           </div>
           {running && progress && (
             <div className="vp-progress">

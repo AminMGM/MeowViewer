@@ -239,6 +239,8 @@ export const api = {
   bluetooth: (paths: string[]) => invoke<void>('bluetooth_send', { paths }),
   email: (paths: string[]) => invoke<boolean>('email_files', { paths }),
   lens: (path: string) => invoke<void>('lens_search', { path }),
+  /** Cancel a running job: scan, dups, export, import, codecs, video, ocr. */
+  cancelTask: (name: 'scan' | 'dups' | 'export' | 'import' | 'codecs' | 'video' | 'ocr') => invoke<void>('cancel_task', { name }),
   cacheInfo: () => invoke<number>('cache_info'),
   clearCache: () => invoke<void>('clear_cache'),
   userMeta: (path: string) => invoke<UserMeta>('get_user_meta', { path }),
@@ -323,4 +325,5 @@ export const SOURCE_LABEL: Record<string, string> = {
   wallpapers: 'Wallpapers',
 }
 
+export const isCancelled = (e: unknown) => String(e).startsWith('Cancelled')
 export const errText = (e: unknown) => (typeof e === 'string' ? e : e instanceof Error ? e.message : String(e))

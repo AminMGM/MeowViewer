@@ -206,15 +206,80 @@ pub fn telegram_send(paths: &[String]) -> Result<bool, String> {
     Ok(true)
 }
 
-/// Bluetooth File Transfer wizard with the files already attached — the same thing Explorer's
-/// "Send to → Bluetooth device" does (it passes the paths to fsquirt.exe).
+/// Drops `paths` onto a shell drop target — exactly what Explorer's "Send to" does.
+fn drop_on(target: &Path, paths: &[String]) -> windows::core::Result<()> {
+    use windows::Win32::Foundation::POINTL;
+    use windows::Win32::System::Com::{CoTaskMemFree, IDataObject};
+    use windows::Win32::System::Ole::{IDropTarget, DROPEFFECT, DROPEFFECT_COPY};
+    use windows::Win32::System::SystemServices::{MK_LBUTTON, MODIFIERKEYS_FLAGS};
+    use windows::Win32::UI::Shell::Common::ITEMIDLIST;
+    use windows::Win32::UI::Shell::{
+        IShellItem, SHCreateItemFromParsingName, SHCreateShellItemArrayFromIDLists, SHParseDisplayName, BHID_DataObject,
+        BHID_SFUIObject,
+    };
+    crate::com_init();
+    unsafe {
+        let mut pidls: Vec<*mut ITEMIDLIST> = Vec::new();
+        for p in paths {
+            let mut pidl: *mut ITEMIDLIST = std::ptr::null_mut();
+            SHParseDisplayName(&HSTRING::from(p.as_str()), None, &mut pidl, 0, None)?;
+            pidls.push(pidl);
+        }
+        let consts: Vec<*const ITEMIDLIST> = pidls.iter().map(|p| *p as *const _).collect();
+        let result = (|| {
+            let arr = SHCreateShellItemArrayFromIDLists(&consts)?;
+            let data: IDataObject = arr.BindToHandler(None, &BHID_DataObject)?;
+            let item: IShellItem = SHCreateItemFromParsingName(&HSTRING::from(target.as_os_str()), None)?;
+            let drop: IDropTarget = item.BindToHandler(None, &BHID_SFUIObject)?;
+            let pt = POINTL { x: 0, y: 0 };
+            let mut effect: DROPEFFECT = DROPEFFECT_COPY;
+            drop.DragEnter(&data, MK_LBUTTON, pt, &mut effect)?;
+            let mut effect: DROPEFFECT = DROPEFFECT_COPY;
+            drop.Drop(&data, MODIFIERKEYS_FLAGS(0), pt, &mut effect)
+        })();
+        for p in pidls {
+            CoTaskMemFree(Some(p as *const _));
+        }
+        result
+    }
+}
+
+/// Bluetooth File Transfer with the files already chosen. fsquirt ignores files on its command
+/// line but accepts them dropped on it (that's how Explorer's "Send to → Bluetooth" works). After
+/// the drop, fsquirt reads the file list back from our data object over COM, so the dropping thread
+/// must keep pumping messages until it has.
 pub fn bluetooth_send(paths: &[String]) -> Result<(), String> {
     let sys = std::env::var("SystemRoot").unwrap_or_else(|_| r"C:\Windows".into());
-    let mut cmd = Command::new(Path::new(&sys).join("System32").join("fsquirt.exe"));
-    for p in paths {
-        cmd.arg(p);
+    let target = Path::new(&sys).join(r"System32\fsquirt.exe");
+    if !target.exists() {
+        return Err("Bluetooth isn't available on this PC".into());
     }
-    cmd.spawn().map(|_| ()).map_err(|e| e.to_string())
+    let (tx, rx) = std::sync::mpsc::channel();
+    let paths = paths.to_vec();
+    std::thread::spawn(move || {
+        let r = drop_on(&target, &paths).map_err(|e| e.message());
+        let ok = r.is_ok();
+        let _ = tx.send(r);
+        if ok {
+            pump_messages(std::time::Duration::from_secs(90));
+        }
+    });
+    rx.recv_timeout(std::time::Duration::from_secs(20)).map_err(|_| "Bluetooth didn't respond".to_string())?
+}
+
+fn pump_messages(for_: std::time::Duration) {
+    use windows::Win32::UI::WindowsAndMessaging::{DispatchMessageW, PeekMessageW, TranslateMessage, MSG, PM_REMOVE};
+    let end = std::time::Instant::now() + for_;
+    let mut msg = MSG::default();
+    while std::time::Instant::now() < end {
+        unsafe {
+            while PeekMessageW(&mut msg, None, 0, 0, PM_REMOVE).as_bool() {
+                let _ = TranslateMessage(&msg);
+                DispatchMessageW(&msg);
+            }
+        }
+        std::thread::sleep(std::time::Duration::from_millis(15));
+    }
 }
 
 /// Classic Outlook: new mail with attachments. Returns false when Outlook isn't installed.

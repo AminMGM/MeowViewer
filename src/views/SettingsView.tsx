@@ -161,8 +161,21 @@ export function SettingsView() {
           </Row>
           {ocr && ocr.total > 0 && (
             <Row title={ocr.running ? 'Reading photos…' : 'Text index'} desc={`${ocr.done.toLocaleString()} of ${ocr.total.toLocaleString()} photos read`}>
-              <div className="vp-progress inline">
-                <span style={{ width: `${(ocr.done / Math.max(1, ocr.total)) * 100}%` }} />
+              <div className="row center">
+                <div className="vp-progress inline">
+                  <span style={{ width: `${(ocr.done / Math.max(1, ocr.total)) * 100}%` }} />
+                </div>
+                {ocr.running ? (
+                  <button className="btn sm" onClick={() => api.cancelTask('ocr')}>
+                    Pause
+                  </button>
+                ) : (
+                  ocr.done < ocr.total && settings.ocr && (
+                    <button className="btn sm" onClick={() => api.ocrControl(true)}>
+                      Resume
+                    </button>
+                  )
+                )}
               </div>
             </Row>
           )}
@@ -245,8 +258,13 @@ export function SettingsView() {
             {codecs ? (
               <span className="chip accent">Installed</span>
             ) : codecPct != null ? (
-              <div className="vp-progress inline">
-                <span style={{ width: `${codecPct}%` }} />
+              <div className="row center">
+                <div className="vp-progress inline">
+                  <span style={{ width: `${codecPct}%` }} />
+                </div>
+                <button className="btn sm" onClick={() => api.cancelTask('codecs')}>
+                  Cancel
+                </button>
               </div>
             ) : (
               <button
@@ -268,7 +286,7 @@ export function SettingsView() {
             )}
           </Row>
           <Row title="Default app" desc="Make MeowViewer open your photos and videos.">
-            <button className="btn" onClick={() => api.openExternal('ms-settings:defaultapps')}>
+            <button className="btn" onClick={() => api.openExternal('ms-settings:defaultapps?registeredAppMachine=MeowViewer')}>
               Open Windows settings
             </button>
           </Row>

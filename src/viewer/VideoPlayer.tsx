@@ -399,6 +399,9 @@ export const VideoPlayer = forwardRef<VideoHandle, Props>(function VideoPlayer(
               <div className="vp-progress">
                 <span style={{ width: `${convertPct}%` }} />
               </div>
+              <button className="btn" onClick={() => api.cancelTask('video')}>
+                Cancel
+              </button>
             </>
           )}
           {state === 'need-codecs' && (
@@ -407,9 +410,14 @@ export const VideoPlayer = forwardRef<VideoHandle, Props>(function VideoPlayer(
                 <strong>.{extOf(path)}</strong> needs the video codec pack (FFmpeg, about 90 MB, downloaded once).
               </p>
               {installing != null ? (
-                <div className="vp-progress">
-                  <span style={{ width: `${installing}%` }} />
-                </div>
+                <>
+                  <div className="vp-progress">
+                    <span style={{ width: `${installing}%` }} />
+                  </div>
+                  <button className="btn" onClick={() => api.cancelTask('codecs')}>
+                    Cancel download
+                  </button>
+                </>
               ) : (
                 <div className="row">
                   <button className="btn primary" onClick={installCodecs}>
@@ -426,6 +434,11 @@ export const VideoPlayer = forwardRef<VideoHandle, Props>(function VideoPlayer(
             <>
               <p>{err || "This video couldn't be played."}</p>
               <div className="row">
+                {err.startsWith('Cancelled') && (
+                  <button className="btn primary" onClick={convert}>
+                    Try again
+                  </button>
+                )}
                 <button className="btn" onClick={() => api.openExternal(path)}>
                   Open in default app
                 </button>

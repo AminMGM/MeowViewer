@@ -194,7 +194,7 @@ export function Onboarding() {
             </div>
             <h2>You're all set</h2>
             <p className="muted">Want photos and videos to open in MeowViewer when you double-click them?</p>
-            <button className="btn" onClick={() => api.openExternal('ms-settings:defaultapps')}>
+            <button className="btn" onClick={() => api.openExternal('ms-settings:defaultapps?registeredAppMachine=MeowViewer')}>
               Make MeowViewer the default app
             </button>
             <p className="muted small">In Windows Settings, search for MeowViewer and choose it for the file types you like.</p>

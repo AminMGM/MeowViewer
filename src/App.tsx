@@ -238,6 +238,9 @@ export default function App() {
                 <div className="indexing" title="Indexing your library">
                   <span className="pulse" />
                   {progress.found.toLocaleString()} items
+                  <button className="icon-btn sm" title="Stop scanning" onClick={() => api.cancelTask('scan')}>
+                    <X size={13} />
+                  </button>
                 </div>
               )}
               <WindowButtons maximized={maximized} />
@@ -291,7 +294,7 @@ export default function App() {
 
       {viewer && <Viewer />}
       {editing && <Editor path={editing} />}
-      {comparing && <Compare paths={comparing} />}
+      {comparing && <Compare paths={comparing.paths} pool={comparing.pool} />}
       {dropping && (
         <div className="drop-overlay">
           <div className="drop-card glass">Drop to open</div>

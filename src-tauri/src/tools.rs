@@ -108,6 +108,7 @@ fn dhash(thumb_dir: &std::path::Path, path: &str) -> Option<u64> {
 }
 
 pub fn find_duplicates(db: &Db, thumb_dir: &std::path::Path, similar: bool, progress: impl Fn(u64, u64)) -> Result<Vec<DupGroup>, String> {
+    let cancel = crate::cancel::token("dups");
     let rows: Vec<(String, i64, i64, u8)> = db.read(|c| {
         let mut st = c.prepare("SELECT path, size, mtime, kind FROM media ORDER BY date DESC")?;
         let r = st.query_map([], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?, r.get(3)?)))?;
@@ -122,6 +123,9 @@ pub fn find_duplicates(db: &Db, thumb_dir: &std::path::Path, similar: bool, prog
     }
     let mut exact_seen = std::collections::HashSet::new();
     for (size, list) in by_size.iter().filter(|(_, l)| l.len() > 1) {
+        if crate::cancel::is_cancelled(&cancel) {
+            return Err(crate::cancel::CANCELLED.into());
+        }
         let mut by_hash: HashMap<u64, Vec<String>> = HashMap::new();
         for r in list {
             if let Some(h) = quick_hash(&r.0, *size as u64) {
@@ -145,6 +149,10 @@ pub fn find_duplicates(db: &Db, thumb_dir: &std::path::Path, similar: bool, prog
         let mut hashes: Vec<(u64, &str, i64)> = Vec::with_capacity(imgs.len());
         let mut new_rows = Vec::new();
         for (i, r) in imgs.iter().enumerate() {
+            if crate::cancel::is_cancelled(&cancel) {
+                save_hashes(db, &mut new_rows);
+                return Err(crate::cancel::CANCELLED.into());
+            }
             let h = match cached.get(&r.0) {
                 Some((m, h)) if *m == r.2 => Some(*h),
                 _ => {
@@ -230,7 +238,11 @@ pub fn export(
 ) -> Result<usize, String> {
     let format = if EXPORT_FORMATS.contains(&format) { format } else { "jpg" };
     let mut n = 0;
+    let cancel = crate::cancel::token("export");
     for (i, p) in paths.iter().enumerate() {
+        if crate::cancel::is_cancelled(&cancel) {
+            return Err(format!("{} — {n} of {} exported", crate::cancel::CANCELLED, paths.len()));
+        }
         progress(i);
         if crate::media::kind_of(p) == Some(crate::media::KIND_VIDEO) {
             continue;

@@ -216,7 +216,7 @@ export function itemMenu(item: Item, opts: { open?: () => void; slideshow?: () =
   )
   if (opts.slideshow) items.push({ label: 'Slideshow from here', icon: <Play size={16} />, run: opts.slideshow })
   if (opts.compareWith)
-    items.push({ label: 'Compare with next photo', icon: <Columns2 size={16} />, run: () => useStore.getState().setCompare([p, opts.compareWith!]) })
+    items.push({ label: 'Compare with…', icon: <Columns2 size={16} />, run: () => useStore.getState().setCompare([p], useStore.getState().viewer?.items ?? null) })
   items.push(
     { separator: true },
     { label: 'Export / convert…', icon: <FileOutput size={16} />, run: () => exportItems([p]) },

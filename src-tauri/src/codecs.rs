@@ -47,7 +47,13 @@ pub async fn install(app: AppHandle, data: PathBuf) -> Result<(), String> {
     let mut f = std::fs::File::create(&zip).map_err(|e| e.to_string())?;
     let mut got = 0f64;
     let mut last = 0f64;
+    let cancel = crate::cancel::token("codecs");
     while let Some(chunk) = res.chunk().await.map_err(|e| e.to_string())? {
+        if crate::cancel::is_cancelled(&cancel) {
+            drop(f);
+            let _ = std::fs::remove_file(&zip);
+            return Err(crate::cancel::CANCELLED.into());
+        }
         f.write_all(&chunk).map_err(|e| e.to_string())?;
         got += chunk.len() as f64;
         if total > 0.0 && got / total - last > 0.01 {
@@ -161,6 +167,8 @@ pub fn prepare(app: &AppHandle, data: &Path, path: &str) -> Result<String, Strin
         .creation_flags(CREATE_NO_WINDOW)
         .spawn()
         .map_err(|e| e.to_string())?;
+    let cancel = crate::cancel::token("video");
+    crate::cancel::register_pid("video", child.id());
     let stdout = child.stdout.take().unwrap();
     for line in BufReader::new(stdout).lines().map_while(Result::ok) {
         if let Some(us) = line.strip_prefix("out_time_us=") {
@@ -173,6 +181,11 @@ pub fn prepare(app: &AppHandle, data: &Path, path: &str) -> Result<String, Strin
         }
     }
     let status = child.wait().map_err(|e| e.to_string())?;
+    crate::cancel::clear_pid("video");
+    if crate::cancel::is_cancelled(&cancel) {
+        let _ = std::fs::remove_file(&tmp);
+        return Err(crate::cancel::CANCELLED.into());
+    }
     if !status.success() {
         let mut err = String::new();
         if let Some(mut e) = child.stderr.take() {
@@ -320,7 +333,15 @@ pub fn with_audio(app: &AppHandle, data: &Path, path: &str, audio: u32) -> Resul
     }
     cmd.args(["-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart"]).arg(&tmp);
     let _ = app.emit("video-progress", (path.to_string(), 50.0, "audio"));
-    let st = cmd.creation_flags(CREATE_NO_WINDOW).status().map_err(|e| e.to_string())?;
+    let cancel = crate::cancel::token("video");
+    let mut child = cmd.creation_flags(CREATE_NO_WINDOW).spawn().map_err(|e| e.to_string())?;
+    crate::cancel::register_pid("video", child.id());
+    let st = child.wait().map_err(|e| e.to_string())?;
+    crate::cancel::clear_pid("video");
+    if crate::cancel::is_cancelled(&cancel) {
+        let _ = std::fs::remove_file(&tmp);
+        return Err(crate::cancel::CANCELLED.into());
+    }
     if !st.success() {
         let _ = std::fs::remove_file(&tmp);
         return Err("Couldn't switch audio track".into());

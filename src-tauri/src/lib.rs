@@ -1,4 +1,5 @@
 mod actions;
+mod cancel;
 mod codecs;
 mod db;
 mod editors;
@@ -1266,7 +1267,12 @@ async fn import_from(app: AppHandle, state: State<'_, AppState>, src: String) ->
     let db = state.db.clone();
     tauri::async_runtime::spawn_blocking(move || -> R<usize> {
         let mut n = 0;
+        let cancel = cancel::token("import");
         for e in walkdir::WalkDir::new(&src).into_iter().filter_map(|e| e.ok()).filter(|e| e.file_type().is_file()) {
+            if cancel::is_cancelled(&cancel) {
+                let _ = app.emit("library-changed", ());
+                return Err(format!("{} — {n} imported", cancel::CANCELLED));
+            }
             let p = e.path().to_string_lossy().into_owned();
             if media::kind_of(&p).is_none() {
                 continue;
@@ -1302,6 +1308,16 @@ async fn installed_editors() -> Vec<editors::Editor> {
 #[tauri::command]
 fn open_in_editor(exe: String, paths: Vec<String>) -> R<()> {
     editors::open_in(&exe, &paths)
+}
+
+/// Cancels a running job: "scan", "dups", "export", "import", "codecs", "video" or "ocr".
+#[tauri::command]
+fn cancel_task(state: State<AppState>, name: String) {
+    if name == "ocr" {
+        state.ocr.stop.store(true, std::sync::atomic::Ordering::SeqCst);
+    } else {
+        cancel::cancel(&name);
+    }
 }
 
 // ---------------------------------------------------------------- run
@@ -1496,6 +1512,7 @@ pub fn run() {
             removable_drives,
             import_from,
             installed_editors,
+            cancel_task,
             video_tracks,
             read_subtitle,
             extract_subtitle,
