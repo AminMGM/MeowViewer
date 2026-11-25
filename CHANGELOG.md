@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.2.2
+
+**Fixed**
+- Viewer in a small window: the close (×), minimise and maximise buttons were pushed off the edge. Window controls
+  now always stay visible; rotate, Live Text, edit, share and delete fold into the ⋯ menu when space is tight
+- In full screen the top bar has an × to leave full screen
+
 ## v1.2.1
 
 **New**

@@ -275,7 +275,17 @@ export function Viewer() {
     },
   ]
   const nextPhoto = items.slice(index + 1).find((it) => it[I.kind] !== KIND.video)?.[I.path]
-  const menuFor = () => (isVault ? vaultMenu() : itemMenu(item, { compareWith: isVideo ? undefined : nextPhoto }))
+  const viewExtras = () =>
+    isVideo
+      ? []
+      : [
+          { label: 'Rotate right', icon: <RotateCw size={16} />, hint: 'R', run: () => rotate(1) },
+          { label: 'Rotate left', icon: <RotateCcw size={16} />, hint: 'Shift+R', run: () => rotate(-1) },
+          { label: liveText ? 'Hide Live Text' : 'Live Text', icon: <ScanText size={16} />, hint: 'T', run: toggleLiveText },
+          { label: 'Info', icon: <Info size={16} />, hint: 'I', run: () => setInfo((v) => !v) },
+          { separator: true },
+        ]
+  const menuFor = () => (isVault ? vaultMenu() : [...viewExtras(), ...itemMenu(item, { compareWith: isVideo ? undefined : nextPhoto })])
   const more = (el: HTMLElement) => openMenuAt(el, menuFor(), 'right')
 
   if (!item) return null
@@ -347,10 +357,10 @@ export function Viewer() {
           )}
           {!isVault && !isVideo && (
             <>
-              <button className={`icon-btn${liveText ? ' active' : ''}`} onClick={toggleLiveText} title="Live Text (T)">
+              <button className={`icon-btn opt-1${liveText ? ' active' : ''}`} onClick={toggleLiveText} title="Live Text (T)">
                 <ScanText size={18} />
               </button>
-              <button className="icon-btn" onClick={() => useStore.getState().setEditing(path)} title="Edit (E)">
+              <button className="icon-btn opt-2" onClick={() => useStore.getState().setEditing(path)} title="Edit (E)">
                 <SlidersHorizontal size={18} />
               </button>
             </>
@@ -366,23 +376,23 @@ export function Viewer() {
           )}
           {item[I.kind] !== KIND.video && !isVault && (
             <>
-              <button className="icon-btn" onClick={() => rotate(-1)} title="Rotate left (Shift+R)">
+              <button className="icon-btn opt-1" onClick={() => rotate(-1)} title="Rotate left (Shift+R)">
                 <RotateCcw size={18} />
               </button>
-              <button className="icon-btn" onClick={() => rotate(1)} title="Rotate right (R)">
+              <button className="icon-btn opt-1" onClick={() => rotate(1)} title="Rotate right (R)">
                 <RotateCw size={18} />
               </button>
             </>
           )}
           {!isVault && (
             <>
-              <button className="icon-btn" onClick={(e) => openMenuAt(e.currentTarget, shareMenu([path]), 'right')} title="Share">
+              <button className="icon-btn opt-2" onClick={(e) => openMenuAt(e.currentTarget, shareMenu([path]), 'right')} title="Share">
                 <Share2 size={18} />
               </button>
-              <button className="icon-btn" onClick={() => moveToTrash([path])} title="Delete (Del)">
+              <button className="icon-btn opt-2" onClick={() => moveToTrash([path])} title="Delete (Del)">
                 <Trash2 size={18} />
               </button>
-              <button className={`icon-btn${info ? ' active' : ''}`} onClick={() => setInfo((v) => !v)} title="Info (I)">
+              <button className={`icon-btn opt-3${info ? ' active' : ''}`} onClick={() => setInfo((v) => !v)} title="Info (I)">
                 <Info size={18} />
               </button>
             </>
@@ -390,11 +400,20 @@ export function Viewer() {
           <button className="icon-btn" onClick={(e) => more(e.currentTarget)} title="More">
             <MoreHorizontal size={18} />
           </button>
+        </div>
+        {/* Window controls never shrink or hide, however small the window is. */}
+        <div className="viewer-win">
           <span className="divider" />
-          <button className="icon-btn" onClick={toggleFullscreen} title="Full screen (F)">
+          <button className="icon-btn opt-3" onClick={toggleFullscreen} title="Full screen (F)">
             {fullscreen ? <Minimize2 size={17} /> : <Expand size={17} />}
           </button>
-          {!fullscreen && <WindowButtons maximized={maximized} />}
+          {fullscreen ? (
+            <button className="icon-btn" onClick={toggleFullscreen} title="Exit full screen (Esc)">
+              <X size={18} />
+            </button>
+          ) : (
+            <WindowButtons maximized={maximized} />
+          )}
         </div>
       </header>
 

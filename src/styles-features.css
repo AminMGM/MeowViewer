@@ -1590,3 +1590,45 @@ button.vp-time:hover {
   height: 22px;
   margin-left: 2px;
 }
+
+
+/* ------------------------------------------------- viewer top bar: narrow windows */
+
+.viewer-top {
+  container-type: inline-size;
+}
+.viewer-title {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.viewer-actions {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+.viewer-win {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  flex-shrink: 0;
+}
+/* Optional buttons fold into the ⋯ menu as the bar narrows; window controls always stay. */
+@container (max-width: 900px) {
+  .viewer-top .opt-1 {
+    display: none;
+  }
+}
+@container (max-width: 720px) {
+  .viewer-top .opt-2 {
+    display: none;
+  }
+  .viewer-count {
+    display: none;
+  }
+}
+@container (max-width: 520px) {
+  .viewer-top .opt-3,
+  .viewer-top .motion-btn {
+    display: none;
+  }
+}
