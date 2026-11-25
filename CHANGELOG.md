@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.2.3
+
+**Fixed**
+- Gallery in a small window: minimise, maximise and close were pushed off the edge. The window controls now always
+  stay visible, the search box shrinks, and below 760 px the sidebar collapses to icons automatically
+- Toolbars and filter rows wrap instead of overflowing in narrow windows
+
 ## v1.2.2
 
 **Fixed**

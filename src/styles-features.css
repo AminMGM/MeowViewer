@@ -1632,3 +1632,52 @@ button.vp-time:hover {
     display: none;
   }
 }
+
+/* ---------------------------------------------- gallery: narrow windows */
+
+.titlebar {
+  min-width: 0;
+}
+.titlebar .search {
+  flex: 1 1 520px;
+  max-width: 520px;
+  min-width: 0;
+}
+.titlebar .search input {
+  min-width: 0;
+}
+.titlebar-right {
+  flex-shrink: 0; /* window controls never get pushed out */
+}
+.title-row {
+  flex-wrap: wrap;
+  row-gap: 6px;
+}
+.title-row h1 {
+  min-width: 0;
+}
+.filters {
+  flex-wrap: wrap;
+}
+@media (max-width: 900px) {
+  .titlebar .search kbd,
+  .indexing {
+    display: none;
+  }
+}
+/* Narrow window: sidebar becomes icons only, brand shows just the logo. */
+@media (max-width: 760px) {
+  .app {
+    grid-template-columns: 64px 1fr;
+  }
+  .nav span,
+  .brand span {
+    display: none;
+  }
+  .brand {
+    width: 30px;
+  }
+  .titlebar {
+    gap: 10px;
+  }
+}
